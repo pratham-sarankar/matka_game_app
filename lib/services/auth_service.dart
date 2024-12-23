@@ -11,7 +11,9 @@ class AuthService extends GetxService {
   /// If the user doen't exist, it will create a new user
   /// with the given [email] and [password].
   Future<UserCredential?> loginWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     late final UserCredential? credentials;
     try {
       credentials = await _auth.signInWithEmailAndPassword(

@@ -2,9 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:matka_game_app/features/home/presentation/screens/home_screen.dart';
-import 'package:matka_game_app/features/login/presentation/screens/login_screen.dart';
 import 'package:matka_game_app/firebase_options.dart';
+import 'package:matka_game_app/navigation/pages.dart';
+import 'package:matka_game_app/navigation/routes.dart';
+import 'package:matka_game_app/repositories/user_repository.dart';
 import 'package:matka_game_app/services/auth_service.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/theme.dart';
@@ -14,13 +15,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Put Dependencies
+  // Put Services
   Get.put(AuthService(), permanent: true);
-  Get.put(UserService(), permanent: true);
+  await Get.putAsync(UserService().init, permanent: true);
+
+  // Put Repositories
+  Get.put(UserRepository());
 
   runApp(const MyApp());
 }
@@ -35,7 +37,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: MaterialTheme(GoogleFonts.merriweatherTextTheme()).light(),
-      home: AuthService.isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      getPages: AppPages.pages,
+      initialRoute: AuthService.isLoggedIn ? Routes.home : Routes.login,
     );
   }
 }

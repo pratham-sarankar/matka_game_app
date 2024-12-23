@@ -21,7 +21,6 @@ class _GradientButtonState extends State<GradientButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
       onTapDown: (details) {
         setState(() {
           isPressed = true;
@@ -36,6 +35,7 @@ class _GradientButtonState extends State<GradientButton> {
         setState(() {
           isPressed = false;
         });
+        widget.onTap?.call();
       },
       child: AnimatedContainer(
         padding: widget.contentPadding ??
