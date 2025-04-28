@@ -9,6 +9,7 @@ import 'package:matka_game_app/repositories/user_repository.dart';
 import 'package:matka_game_app/services/auth_service.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/theme.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 void main() async {
   // Ensure that the Flutter binding is initialized
@@ -16,6 +17,11 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Configure Firebase UI Auth
+  FirebaseUIAuth.configureProviders([
+    EmailAuthProvider(),
+  ]);
 
   // Put Services
   Get.put(AuthService(), permanent: true);
@@ -36,7 +42,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: MaterialTheme(GoogleFonts.merriweatherTextTheme()).light(),
+      theme: MaterialTheme(GoogleFonts.poppinsTextTheme()).light(),
       getPages: AppPages.pages,
       initialRoute: AuthService.isLoggedIn ? Routes.home : Routes.login,
     );

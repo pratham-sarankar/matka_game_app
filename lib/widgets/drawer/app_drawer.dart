@@ -3,11 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:matka_game_app/screens/auth/login_screen.dart';
 import 'package:matka_game_app/utils/user_role.dart';
-import 'package:matka_game_app/screens/change_password/presentation/screens/change_password_screen.dart';
 import 'package:matka_game_app/screens/game_rates/presentation/screens/game_rates_screen.dart';
-import 'package:matka_game_app/screens/login/presentation/screens/login_screen.dart';
-import 'package:matka_game_app/screens/my_profile/presentation/screens/my_profile_screen.dart';
 import 'package:matka_game_app/screens/notice_board/presentation/screens/notice_board_screen.dart';
 import 'package:matka_game_app/screens/notification/presentation/screens/notification_screen.dart';
 import 'package:matka_game_app/screens/win_history/presentation/screens/win_history_screen.dart';
@@ -239,7 +237,7 @@ class AppDrawer extends StatelessWidget {
     }
     Navigator.pushReplacement(
       Get.context!,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      MaterialPageRoute(builder: (context) => const AuthScreen()),
     );
   }
 }

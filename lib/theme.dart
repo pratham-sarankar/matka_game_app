@@ -371,7 +371,7 @@ class MaterialTheme {
         scaffoldBackgroundColor: colorScheme.surface,
         appBarTheme: AppBarTheme(
           backgroundColor: const Color(0xff530b47),
-          titleTextStyle: GoogleFonts.merriweather(
+          titleTextStyle: GoogleFonts.poppins(
             color: const Color(0xFFecd7b4),
             fontSize: 20,
             fontWeight: FontWeight.bold,
