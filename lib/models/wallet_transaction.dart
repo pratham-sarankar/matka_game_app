@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class WalletTransaction {
   final String id;
   final String userID;
-  num amount;
+  double amount;
   WalletTransactionType type;
   String note;
   WalletTransactionStatus status;
@@ -53,7 +53,7 @@ class WalletTransaction {
     return WalletTransaction._fromMap(data);
   }
 
-  Map<String,dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       "userID": userID,
       "amount": amount,
@@ -105,7 +105,6 @@ extension WalletTransactionTypeExtension on WalletTransactionType {
     }
   }
 
-
   static List<DropdownMenuItem<String>> get dropDownItems {
     return WalletTransactionType.values.map(
       (e) {
@@ -136,7 +135,7 @@ extension WalletTransactionStatusExtension on WalletTransactionStatus {
     }
   }
 
-  Color get color{
+  Color get color {
     switch (this) {
       case WalletTransactionStatus.pending:
         return Colors.orange.shade700;
@@ -162,7 +161,7 @@ extension WalletTransactionStatusExtension on WalletTransactionStatus {
 
   static List<DropdownMenuItem<String>> get dropDownItems {
     return WalletTransactionStatus.values.map(
-          (e) {
+      (e) {
         return DropdownMenuItem(
           value: e.name,
           child: Text(e.name),

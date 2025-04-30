@@ -1,4 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_storage/firebase_ui_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,19 +12,29 @@ import 'package:matka_game_app/repositories/user_repository.dart';
 import 'package:matka_game_app/services/auth_service.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/theme.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 void main() async {
   // Ensure that the Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Configure Firebase UI Auth
   FirebaseUIAuth.configureProviders([
     EmailAuthProvider(),
   ]);
+
+  // Configure Firebase UI Storage
+  final storage = FirebaseStorage.instance;
+  final config = FirebaseUIStorageConfiguration(
+    storage: storage,
+    uploadRoot: storage.ref('files'),
+    namingPolicy: UuidFileUploadNamingPolicy(),
+  );
+  await FirebaseUIStorage.configure(config);
 
   // Put Services
   Get.put(AuthService(), permanent: true);

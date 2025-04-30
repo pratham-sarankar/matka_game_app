@@ -39,10 +39,12 @@ extension UserTypeExtension on UserType {
     }
   }
 
-  static List<DropdownMenuItem> get dropDownItems{
-    return UserType.values.map((e) => DropdownMenuItem(
-      value: e,
-      child: Text(e.name),
-    )).toList();
-}
+  static List<DropdownMenuItem> get dropDownItems {
+    return UserType.values
+        .map((e) => DropdownMenuItem(
+              value: e,
+              child: Text(e.name),
+            ))
+        .toList();
+  }
 }

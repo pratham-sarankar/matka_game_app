@@ -28,7 +28,7 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Get.to(const TransactionForm());
+          Get.to(() => const TransactionForm());
         },
         label: const Row(
           children: [

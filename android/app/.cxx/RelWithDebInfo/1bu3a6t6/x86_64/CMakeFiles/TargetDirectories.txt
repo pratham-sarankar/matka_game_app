@@ -1,0 +1,2 @@
+/Users/prathamsarankar/flutter_projects/matka_game_app/android/app/.cxx/RelWithDebInfo/1bu3a6t6/x86_64/CMakeFiles/edit_cache.dir
+/Users/prathamsarankar/flutter_projects/matka_game_app/android/app/.cxx/RelWithDebInfo/1bu3a6t6/x86_64/CMakeFiles/rebuild_cache.dir

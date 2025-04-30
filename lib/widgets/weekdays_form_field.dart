@@ -32,7 +32,8 @@ class WeekdaysFormField extends FormField<String> {
                         ),
                         selected: state.value?[i] == "1",
                         onSelected: (selected) {
-                          final newValue = state.value?.split("") ?? List.filled(7, "0");
+                          final newValue =
+                              state.value?.split("") ?? List.filled(7, "0");
                           newValue[i] = selected ? "1" : "0";
                           state.didChange(newValue.join());
                         },

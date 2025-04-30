@@ -4,7 +4,6 @@ import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/repositories/market_repository.dart';
 import 'package:matka_game_app/screens/home/presentation/widgets/market_card.dart';
 import 'package:matka_game_app/screens/markets/market_form.dart';
-import 'package:matka_game_app/utils/time_of_day_extension.dart';
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -20,8 +19,6 @@ class _MarketScreenState extends State<MarketScreen>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    print(TimeOfDayExtension.fromString("23:15"));
     return Scaffold(
       key: _scaffoldKey,
       floatingActionButton: FloatingActionButton(

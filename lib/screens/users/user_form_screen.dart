@@ -272,7 +272,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 widget.user,
                 repository: widget.repository,
               ),
-
             ],
           ),
         ),

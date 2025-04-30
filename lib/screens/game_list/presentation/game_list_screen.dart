@@ -66,7 +66,6 @@ class _GameListScreenState extends State<GameListScreen> {
         ],
       ),
       body: LayoutBuilder(builder: (context, constraints) {
-        print(constraints.maxHeight * 0.1);
         return GridView.count(
           padding: EdgeInsets.symmetric(
             horizontal: width * 0.05,
