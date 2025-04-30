@@ -1,11 +1,13 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:matka_game_app/repositories/wallet_repository.dart';
 import 'package:matka_game_app/screens/my_wallet/transaction_form.dart';
+import 'package:matka_game_app/screens/my_wallet/widgets/my_wallet_card.dart';
+import 'package:matka_game_app/screens/my_wallet/widgets/my_wallet_filter_dialog.dart';
 import 'package:matka_game_app/services/user_service.dart';
-import 'package:photo_view/photo_view.dart';
-
 import '../../models/wallet_transaction.dart';
 
 class MyWalletScreen extends StatefulWidget {
@@ -18,13 +20,25 @@ class MyWalletScreen extends StatefulWidget {
 }
 
 class _MyWalletScreenState extends State<MyWalletScreen> {
-  final _repository = WalletRepository();
+  final WalletRepository _walletRepository = WalletRepository();
+  double? minAmount;
+  double? maxAmount;
+  DateTime? fromDate;
+  DateTime? toDate;
+  WalletTransactionType? selectedType;
+  WalletTransactionStatus? selectedStatus;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Wallet"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -38,144 +52,146 @@ class _MyWalletScreenState extends State<MyWalletScreen> {
           ],
         ),
       ),
-      body: StreamBuilder(
-        stream: _repository.streamTransactions(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return ListView.builder(
-              itemBuilder: (context, index) {
-                final transaction = snapshot.data![index];
-                return Card(
-                  margin: const EdgeInsets.only(
-                    right: 20,
-                    left: 20,
-                    top: 20,
-                  ),
-                  elevation:
-                      transaction.status == WalletTransactionStatus.rejected
-                          ? 0
-                          : 5,
-                  color: transaction.status == WalletTransactionStatus.rejected
-                      ? Colors.grey.shade300
-                      : Colors.grey.shade200,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 15,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Rupee Symbol
-                        Row(
-                          children: [
-                            Text(
-                              "${transaction.type.symbol} ₹${transaction.amount}",
-                              style: TextStyle(
-                                color: transaction.type ==
-                                        WalletTransactionType.deposit
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Spacer(),
-                            Chip(
-                              label: Text(
-                                transaction.status.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              color: WidgetStatePropertyAll(
-                                  transaction.status.color),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (transaction.mediaURL != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10, bottom: 10),
-                            child: GestureDetector(
-                              onTap: () {
-                                Get.to(
-                                  PhotoView(
-                                    imageProvider:
-                                        NetworkImage(transaction.mediaURL!),
-                                  ),
-                                );
-                              },
-                              child: Image.network(
-                                transaction.mediaURL!,
-                                height: 80,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: 5),
-                        Text(
-                          "Note : ${transaction.note}",
-                          style: TextStyle(
-                            color: Colors.grey.shade900,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (transaction.status ==
-                            WalletTransactionStatus.pending)
-                          Center(
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 15,
-                                  vertical: 10,
-                                ),
-                                side: BorderSide(
-                                  color: Colors.red.shade800,
-                                  width: 2,
-                                ),
-                                minimumSize: const Size(double.infinity, 0),
-                              ),
-                              onPressed: () {
-                                _repository.deleteTransaction(transaction);
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.delete,
-                                    color: Colors.red.shade900,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    "Delete Request",
-                                    style: TextStyle(
-                                      color: Colors.red.shade900,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              itemCount: snapshot.data!.length,
-            );
-          }
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {});
         },
+        child: FirestoreListView<Map<String, dynamic>>(
+          query: _walletRepository.query(
+            minAmount: minAmount,
+            maxAmount: maxAmount,
+            fromDate: fromDate,
+            toDate: toDate,
+            selectedType: selectedType,
+            selectedStatus: selectedStatus,
+          ),
+          itemBuilder: (context, snapshot) {
+            final transaction = WalletTransaction.fromDoc(snapshot);
+            return MyWalletCard(
+              transaction: transaction,
+              onDelete: transaction.status == WalletTransactionStatus.pending
+                  ? () => _deleteTransaction(transaction)
+                  : null,
+            );
+          },
+          loadingBuilder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Text('Error: ${error.toString()}'),
+          ),
+          emptyBuilder: (context) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/empty-wallet.png',
+                    height: 200,
+                    opacity: const AlwaysStoppedAnimation(0.8),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'No Transactions Yet',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Your transaction history will appear here',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Get.to(() => const TransactionForm());
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add New Transaction'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => MyWalletFilterDialog(
+        initialMinAmount: minAmount,
+        initialMaxAmount: maxAmount,
+        initialFromDate: fromDate,
+        initialToDate: toDate,
+        initialType: selectedType,
+        initialStatus: selectedStatus,
+        onReset: () {
+          setState(() {
+            minAmount = null;
+            maxAmount = null;
+            fromDate = null;
+            toDate = null;
+            selectedType = null;
+            selectedStatus = null;
+          });
+        },
+        onApply: ({
+          double? minAmount,
+          double? maxAmount,
+          DateTime? fromDate,
+          DateTime? toDate,
+          WalletTransactionType? type,
+          WalletTransactionStatus? status,
+        }) {
+          setState(() {
+            this.minAmount = minAmount;
+            this.maxAmount = maxAmount;
+            this.fromDate = fromDate;
+            this.toDate = toDate;
+            selectedType = type;
+            selectedStatus = status;
+          });
+        },
+      ),
+    );
+  }
+
+  void _deleteTransaction(WalletTransaction transaction) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Transaction'),
+        content:
+            const Text('Are you sure you want to delete this transaction?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _walletRepository.deleteTransaction(transaction);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

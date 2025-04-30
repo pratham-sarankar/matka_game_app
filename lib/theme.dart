@@ -384,6 +384,17 @@ class MaterialTheme {
           titleSpacing: 5,
         ),
         canvasColor: colorScheme.surface,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
       );
 
   List<ExtendedColor> get extendedColors => [];
