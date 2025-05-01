@@ -1,0 +1,2 @@
+C:/Users/yashs/StudioProjects/matka_game_app/android/app/.cxx/Debug/4q2n2449/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/yashs/StudioProjects/matka_game_app/android/app/.cxx/Debug/4q2n2449/x86_64/CMakeFiles/rebuild_cache.dir
