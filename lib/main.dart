@@ -16,6 +16,7 @@ import 'package:matka_game_app/theme.dart';
 void main() async {
   // Ensure that the Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  //sdljgvbdsougblsdukfbgdf
 
   // Initialize Firebase
   await Firebase.initializeApp(
