@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      //done setting up github actions
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: MaterialTheme(GoogleFonts.poppinsTextTheme()).light(),
