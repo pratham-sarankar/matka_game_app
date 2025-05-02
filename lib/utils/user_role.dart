@@ -1,46 +1,46 @@
 import 'package:flutter/material.dart';
 
-enum UserType {
+enum UserRole {
   admin,
   user,
 }
 
-extension UserTypeExtension on UserType {
+extension UserRoleExtension on UserRole {
   bool get isAdmin {
-    return this == UserType.admin;
+    return this == UserRole.admin;
   }
 
   String get name {
     switch (this) {
-      case UserType.admin:
+      case UserRole.admin:
         return 'Admin';
-      case UserType.user:
+      case UserRole.user:
         return 'User';
     }
   }
 
   int get code {
     switch (this) {
-      case UserType.admin:
+      case UserRole.admin:
         return 0;
-      case UserType.user:
+      case UserRole.user:
         return 1;
     }
   }
 
-  static UserType fromCode(int? code) {
+  static UserRole fromCode(int? code) {
     switch (code) {
       case 0:
-        return UserType.admin;
+        return UserRole.admin;
       case 1:
-        return UserType.user;
+        return UserRole.user;
       default:
-        return UserType.user;
+        return UserRole.user;
     }
   }
 
   static List<DropdownMenuItem> get dropDownItems {
-    return UserType.values
+    return UserRole.values
         .map((e) => DropdownMenuItem(
               value: e,
               child: Text(e.name),

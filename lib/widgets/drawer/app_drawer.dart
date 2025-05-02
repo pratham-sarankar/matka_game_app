@@ -20,8 +20,8 @@ class AppDrawer extends StatelessWidget {
     required this.onSwitchMode,
   });
 
-  final UserType role;
-  final UserType mode;
+  final UserRole role;
+  final UserRole mode;
   final VoidCallback onSwitchMode;
 
   @override
@@ -198,12 +198,12 @@ class AppDrawer extends StatelessWidget {
                 Get.toNamed(Routes.changePassword);
               },
             ),
-            DrawerTile(
-              text: "Log Out",
-              icon: Icons.exit_to_app,
-              onTap: showSignOutConfirmationDialog,
-            ),
           ],
+          DrawerTile(
+            text: "Log Out",
+            icon: Icons.exit_to_app,
+            onTap: showSignOutConfirmationDialog,
+          ),
         ],
       ),
     );

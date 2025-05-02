@@ -43,9 +43,12 @@ class AuthScreen extends StatelessWidget {
               );
             },
             actions: [
-              AuthStateChangeAction<SignedIn>(
-                (context, state) => Get.offAllNamed(Routes.home),
-              ),
+              AuthStateChangeAction<SignedIn>((context, state) {
+                Get.offAllNamed(Routes.home);
+              }),
+              AuthStateChangeAction<UserCreated>((context, state) {
+                Get.offAllNamed(Routes.home);
+              }),
             ],
           ),
         ],

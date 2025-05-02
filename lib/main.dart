@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -9,7 +10,6 @@ import 'package:matka_game_app/firebase_options.dart';
 import 'package:matka_game_app/navigation/pages.dart';
 import 'package:matka_game_app/navigation/routes.dart';
 import 'package:matka_game_app/repositories/user_repository.dart';
-import 'package:matka_game_app/services/auth_service.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/theme.dart';
 
@@ -37,7 +37,6 @@ void main() async {
   await FirebaseUIStorage.configure(config);
 
   // Put Services
-  Get.put(AuthService(), permanent: true);
   await Get.putAsync(UserService().init, permanent: true);
 
   // Put Repositories
@@ -57,7 +56,9 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: MaterialTheme(GoogleFonts.poppinsTextTheme()).light(),
       getPages: AppPages.pages,
-      initialRoute: AuthService.isLoggedIn ? Routes.home : Routes.login,
+      initialRoute: FirebaseAuth.instance.currentUser != null
+          ? Routes.home
+          : Routes.login,
     );
   }
 }

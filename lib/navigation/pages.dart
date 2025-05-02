@@ -13,7 +13,7 @@ class AppPages {
   static final List<GetPage> pages = [
     GetPage(
       name: Routes.home,
-      page: () => HomeScreen(Get.find(), Get.find()),
+      page: () => HomeScreen(Get.find()),
     ),
     GetPage(
       name: Routes.login,
