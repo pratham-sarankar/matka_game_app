@@ -16,6 +16,7 @@ import 'package:matka_game_app/theme.dart';
 void main() async {
   // Ensure that the Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  //sdljgvbdsougblsdukfbgdfcfwfwersfsrgergerfbftbe
 
   // Initialize Firebase
   await Firebase.initializeApp(
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      //done setting up github actions
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: MaterialTheme(GoogleFonts.poppinsTextTheme()).light(),
