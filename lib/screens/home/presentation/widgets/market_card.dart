@@ -26,7 +26,7 @@ class _MarketCardState extends State<MarketCard> {
       child: Card(
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xfffcdfa1),
             width: 1.5,
@@ -34,68 +34,92 @@ class _MarketCardState extends State<MarketCard> {
         ),
         borderOnForeground: true,
         clipBehavior: Clip.hardEdge,
-        elevation: 5,
-        shadowColor: const Color(0xffc6a179),
+        elevation: 8,
+        shadowColor: const Color(0xffc6a179).withOpacity(0.5),
         child: Column(
           children: [
             Container(
               width: size.width,
               height: size.height * 0.1,
-              decoration: const BoxDecoration(
-                color: Color(0xff770e66),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
                     Color(0xffcb1964),
                     Color(0xffab1865),
                     Color(0xff770e66),
                   ],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xffcb1964).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              padding: const EdgeInsets.only(
-                top: 14,
-                bottom: 14,
-                right: 14,
-                left: 5,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
               child: Stack(
                 fit: StackFit.loose,
                 children: [
                   Positioned(
-                    left: 6,
-                    top: 0,
-                    bottom: 0,
+                    left: 5,
+                    top: 5,
+                    bottom: 5,
                     child: Image.asset(
                       'assets/images/growth.png',
-                      height: size.height * 0.08,
+                      // height: size.height * 0.0,
                     ),
                   ),
                   Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.market.name,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size.height * 0.022,
-                            fontWeight: FontWeight.bold,
-                            height: 1.5,
-                          ),
+                    child: FittedBox(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              widget.market.name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.height * 0.022,
+                                fontWeight: FontWeight.bold,
+                                height: 1.5,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '168-54-130',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: size.height * 0.020,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '168-54-130',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size.height * 0.020,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   Positioned(
-                    top: 0,
-                    bottom: 0,
+                    top: 5,
+                    bottom: 5,
                     right: 0,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -106,24 +130,43 @@ class _MarketCardState extends State<MarketCard> {
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
-                                vertical: 10,
+                                vertical: 12,
                               ),
                               backgroundColor: const Color(0xff258435),
                               foregroundColor: Colors.white,
+                              elevation: 4,
+                              shadowColor:
+                                  const Color(0xff258435).withOpacity(0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               textStyle: const TextStyle(
                                 fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
                             child: const Text("Play Now"),
                           )
                         else
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.red.withValues(alpha: 0.5),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Text(
                               'Closed',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
                           ),
@@ -136,41 +179,69 @@ class _MarketCardState extends State<MarketCard> {
             Container(
               width: size.width,
               height: size.height * 0.06,
-              decoration: const BoxDecoration(
-                color: Color(0xffc6a179),
+              decoration: BoxDecoration(
+                color: const Color(0xffc6a179),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xffc6a179).withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text(
+                  _buildTimeInfo(
                     'Open: ${widget.market.openTime.format(context)}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: size.height * 0.015,
-                      fontWeight: FontWeight.w500,
+                    size,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.market.isOpen
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: widget.market.isOpen
+                            ? Colors.green.withOpacity(0.5)
+                            : Colors.red.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      widget.market.isOpen ? 'RUNNING' : 'CLOSED',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: size.height * 0.018,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  Text(
-                    widget.market.isOpen ? 'RUNNING' : 'CLOSED',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: size.height * 0.018,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
+                  _buildTimeInfo(
                     'Close: ${widget.market.closeTime.format(context)}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: size.height * 0.015,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    size,
                   ),
                 ],
               ),
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimeInfo(String text, Size size) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: size.height * 0.015,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

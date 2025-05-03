@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/screens/home/presentation/widgets/home_button.dart';
 import 'package:matka_game_app/screens/home/presentation/widgets/market_card.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/utils/user_role.dart';
 import 'package:matka_game_app/widgets/active_user_check.dart';
+import 'package:matka_game_app/widgets/balance_widget.dart';
 import 'package:matka_game_app/widgets/drawer/app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,42 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
           key: _scaffoldKey,
           appBar: AppBar(
             actions: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 15),
-                    decoration: BoxDecoration(
-                      color: const Color(0xff29031c),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xfffcdfa1),
-                        width: 1,
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 5,
-                    ),
-                    child: Text(
-                      '0',
-                      style: const TextStyle(
-                        color: Color(0xFFecd7b4),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: -5,
-                    bottom: -5,
-                    left: -18,
-                    child: Image.asset(
-                      "assets/images/coin.png",
-                    ),
-                  ),
-                ],
-              ),
+              BalanceWidget(userId: widget.userService.currentUserId),
             ],
             title: const Text('AK Online'),
             leading: IconButton(
@@ -146,19 +114,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              MarketCard(
-                market: Market.empty(),
-                onPlay: () {},
-                onTap: () {},
-              ),
-              const SizedBox(height: 18),
-              MarketCard(
-                market: Market.empty(),
-                onPlay: () {},
-                onTap: () {},
+              const SizedBox(height: 20),
+              FirestoreListView<Map<String, dynamic>>(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                query: FirebaseFirestore.instance.collection('markets'),
+                itemBuilder: (context, snapshot) {
+                  final market = Market.fromDoc(snapshot);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 18),
+                    child: MarketCard(
+                      market: market,
+                      onPlay: () {
+                        // TODO: Implement play functionality
+                      },
+                      onTap: () {
+                        // TODO: Implement market details navigation
+                      },
+                    ),
+                  );
+                },
+                loadingBuilder: (context) => const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFFecd7b4),
+                  ),
+                ),
+                errorBuilder: (context, error, stackTrace) => Center(
+                  child: Text(
+                    'Error loading markets: $error',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                emptyBuilder: (context) => const Center(
+                  child: Text(
+                    'No markets available',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
             ],
           ),
