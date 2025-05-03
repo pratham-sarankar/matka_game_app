@@ -1,88 +1,290 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:matka_game_app/models/market.dart';
-import 'package:matka_game_app/repositories/market_repository.dart';
-import 'package:matka_game_app/screens/home/presentation/widgets/market_card.dart';
 import 'package:matka_game_app/screens/markets/market_form.dart';
+import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class MarketScreen extends StatefulWidget {
+class MarketScreen extends StatelessWidget {
   const MarketScreen({super.key});
-
-  @override
-  State<MarketScreen> createState() => _MarketScreenState();
-}
-
-class _MarketScreenState extends State<MarketScreen>
-    with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final MarketRepository _marketRepository = MarketRepository();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addMarket,
-        child: const Icon(Icons.add),
-      ),
       appBar: AppBar(
-        title: const Text("Markets"),
+        title: Text(
+          'Markets',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: StreamBuilder<Iterable<Market>>(
-        stream: _marketRepository.streamAll(),
-        builder: (context, snapshot) {
-          return SafeArea(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 15,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.1),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: FirestoreListView<Map<String, dynamic>>(
+          query: FirebaseFirestore.instance.collection('markets'),
+          itemBuilder: (context, snapshot) {
+            final market = Market.fromDoc(snapshot);
+            return Card(
+              margin: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-              itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
-                final market = snapshot.data!.elementAt(index);
-                return MarketCard(
-                  market: market,
-                  onTap: () {
-                    _editMarket(market);
-                  },
-                  onPlay: () {},
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: 10);
-              },
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: InkWell(
+                onTap: () => _showMarketForm(context, market),
+                borderRadius: BorderRadius.circular(15),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              market.name,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          _buildStatusChip(market),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTimeRow(
+                        'Open Time',
+                        market.openTime.format(context),
+                        market.openLastBidTime.format(context),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildTimeRow(
+                        'Close Time',
+                        market.closeTime.format(context),
+                        market.closeLastBidTime.format(context),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildOpenDays(market.openDays),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          emptyBuilder: (context) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.store_outlined,
+                  size: 64,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No Markets Found',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Add a new market to get started',
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Error Loading Markets',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    color: Colors.red.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please try again later',
+                  style: GoogleFonts.poppins(
+                    color: Colors.red.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showMarketForm(context, null),
+        icon: const Icon(Icons.add),
+        label: Text(
+          'Add Market',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
 
-  void _addMarket() async {
-    try {
-      Market? market =
-          await Get.to(MarketForm(onDelete: _marketRepository.delete));
-      if (market != null) {
-        await _marketRepository.create(market);
-      }
-    } catch (e) {
-      Get.snackbar(
-          "Error", "An error occurred while adding market. Please try again.");
-    }
+  Widget _buildStatusChip(Market market) {
+    final isOpen = market.isOpen;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: isOpen ? Colors.green.shade50 : Colors.red.shade50,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isOpen ? Colors.green.shade200 : Colors.red.shade200,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isOpen ? Icons.circle : Icons.circle_outlined,
+            size: 12,
+            color: isOpen ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            isOpen ? 'Open' : 'Closed',
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: isOpen ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void _editMarket(Market market) async {
-    try {
-      Market? result = await Get.to(MarketForm(
+  Widget _buildTimeRow(String label, String time, String lastBidTime) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            time,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Text(
+          'Last Bid: $lastBidTime',
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOpenDays(String openDays) {
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (var i = 0; i < 7; i++)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: openDays[i] == '1'
+                  ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
+                  : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              days[i],
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: openDays[i] == '1'
+                    ? Theme.of(Get.context!).primaryColor
+                    : Colors.grey.shade600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showMarketForm(BuildContext context, Market? market) async {
+    final result = await Get.to<Market>(
+      () => MarketForm(
         market: market,
-        onDelete: _marketRepository.delete,
-      ));
-      if (result != null) {
-        await _marketRepository.update(result);
+        onDelete: market != null
+            ? (id) async {
+                await FirebaseFirestore.instance
+                    .collection('markets')
+                    .doc(id)
+                    .delete();
+              }
+            : null,
+      ),
+    );
+
+    if (result != null) {
+      if (market == null) {
+        // Create new market
+        await FirebaseFirestore.instance
+            .collection('markets')
+            .add(result.toMap());
+      } else {
+        // Update existing market
+        await FirebaseFirestore.instance
+            .collection('markets')
+            .doc(market.id)
+            .update(result.toMap());
       }
-    } catch (e) {
-      Get.snackbar(
-          "Error", "An error occurred while editing market. Please try again.");
     }
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 import 'package:matka_game_app/widgets/time_of_day_form_field.dart';
@@ -21,7 +24,7 @@ class MarketForm extends StatefulWidget {
 }
 
 class _MarketFormState extends State<MarketForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormBuilderState>();
   late Market market;
 
   @override
@@ -33,184 +36,283 @@ class _MarketFormState extends State<MarketForm> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.market != null;
+    final size = MediaQuery.sizeOf(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? "Edit Market" : "Add Market"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          right: 20,
-          left: 20,
-          top: 25,
-          bottom: 10,
+        title: Text(
+          isEditing ? "Edit Market" : "Add Market",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: "Market Name"),
-                initialValue: widget.market?.name,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Market Name is required";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.name = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              TimePickerFormField(
-                title: "Open Time",
-                initialValue: widget.market?.openTime,
-                validator: (value) {
-                  if (value == null) {
-                    return "Open Time is required";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.openTime = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              TimePickerFormField(
-                title: "Open Last Bid Time",
-                initialValue: widget.market?.openLastBidTime,
-                validator: (value) {
-                  if (value == null) {
-                    return "Open Last Bid Time is required";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.openLastBidTime = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              TimePickerFormField(
-                title: "Close Time",
-                initialValue: widget.market?.closeTime,
-                validator: (value) {
-                  if (value == null) {
-                    return "Close Time is required";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.closeTime = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              TimePickerFormField(
-                title: "Close Last Bid Time",
-                initialValue: widget.market?.closeLastBidTime,
-                validator: (value) {
-                  if (value == null) {
-                    return "Close Last Bid Time is required";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.closeLastBidTime = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              WeekdaysFormField(
-                initialValue: widget.market?.openDays,
-                validator: (value) {
-                  if (value == null) {
-                    return "Open Days is required";
-                  } else if (value.length != 7) {
-                    return "Open Days must be a 7 character string.";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  market.openDays = value!;
-                },
-              ),
-              const SizedBox(height: 20),
-              GradientButton(
-                child: const Center(
-                  child: Text(
-                    "Submit",
-                    style: TextStyle(fontSize: 15, color: Colors.white),
-                  ),
-                ),
-                onTap: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    _formKey.currentState?.save();
-                    Get.back(result: market);
-                  }
-                },
-              ),
-              if (isEditing) ...[
-                const SizedBox(height: 15),
-                OutlinedButton(
-                  onPressed: _deleteMarket,
-                  style: OutlinedButton.styleFrom(
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.1),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: FormBuilder(
+              key: _formKey,
+              initialValue: {
+                'name': widget.market?.name ?? '',
+                'openTime': widget.market?.openTime,
+                'openLastBidTime': widget.market?.openLastBidTime,
+                'closeTime': widget.market?.closeTime,
+                'closeLastBidTime': widget.market?.closeLastBidTime,
+                'openDays': widget.market?.openDays ?? '0000000',
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    side: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Market Details',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          FormBuilderTextField(
+                            name: 'name',
+                            decoration: InputDecoration(
+                              labelText: 'Market Name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              prefixIcon: const Icon(Icons.store),
+                            ),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(),
+                              FormBuilderValidators.minLength(3),
+                            ]),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.trash),
-                      SizedBox(width: 8),
-                      Text(
-                        "Delete",
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(height: 20),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Timing',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TimePickerFormField(
+                            name: 'openTime',
+                            title: 'Open Time',
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Open Time is required';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          TimePickerFormField(
+                            name: 'openLastBidTime',
+                            title: 'Open Last Bid Time',
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Open Last Bid Time is required';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          TimePickerFormField(
+                            name: 'closeTime',
+                            title: 'Close Time',
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Close Time is required';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          TimePickerFormField(
+                            name: 'closeLastBidTime',
+                            title: 'Close Last Bid Time',
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Close Last Bid Time is required';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Operating Days',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          WeekdaysFormField(
+                            name: 'openDays',
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Open Days is required';
+                              }
+                              if (value.length != 7) {
+                                return 'Open Days must be a 7 character string';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  GradientButton(
+                    onTap: _submitForm,
+                    child: Text(
+                      isEditing ? 'Update Market' : 'Create Market',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  if (isEditing) ...[
+                    const SizedBox(height: 15),
+                    OutlinedButton.icon(
+                      onPressed: _deleteMarket,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                          width: 2,
                         ),
                       ),
-                    ],
-                  ),
-                )
-              ],
-            ],
+                      icon: const Icon(CupertinoIcons.trash),
+                      label: Text(
+                        'Delete Market',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  void _deleteMarket() async {
-    // if (widget.onDelete == null) return;
+  void _submitForm() {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      final values = _formKey.currentState!.value;
+      final updatedMarket = market.copyWith(
+        name: values['name'] as String,
+        openTime: values['openTime'] as TimeOfDay,
+        openLastBidTime: values['openLastBidTime'] as TimeOfDay,
+        closeTime: values['closeTime'] as TimeOfDay,
+        closeLastBidTime: values['closeLastBidTime'] as TimeOfDay,
+        openDays: values['openDays'] as String,
+      );
+      Get.back(result: updatedMarket);
+    }
+  }
+
+  void _deleteMarket() {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Are you sure?"),
-          content: const Text(
-              "Deleting this market will delete all the bets associated with this market "
-              "and user will lose their pending bet credits?"),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text("Cancel"),
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Delete Market',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete this market? This action cannot be undone and will affect all associated bets.',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-            TextButton(
-              onPressed: () async {
-                Get.back();
-                Get.back();
-                await widget.onDelete?.call(widget.market!.id);
-              },
-              child: const Text("Delete"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              Get.back();
+              widget.onDelete?.call(widget.market!.id);
+            },
+            child: Text(
+              'Delete',
+              style: GoogleFonts.poppins(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
