@@ -17,6 +17,9 @@ class UserService extends GetxService {
   /// Holds the current user's data
   final Rx<UserData?> userData = Rx<UserData?>(UserData.empty());
 
+  /// Gets the current user's ID
+  String get currentUserId => _auth.currentUser?.uid ?? '';
+
   /// Initializes the service by setting up auth state listener and fetching initial data
   Future<UserService> init() async {
     // Set up auth state listener
