@@ -6,7 +6,6 @@ import 'package:matka_game_app/screens/auth/login_screen.dart';
 import 'package:matka_game_app/screens/markets/market_screen.dart';
 import 'package:matka_game_app/navigation/routes.dart';
 import 'package:matka_game_app/screens/my_wallet/my_wallet_screen.dart';
-import 'package:matka_game_app/screens/user_wallets/user_wallets.dart';
 import 'package:matka_game_app/screens/users/users_screen.dart';
 import 'package:matka_game_app/screens/profile/profile_screen.dart';
 import 'package:matka_game_app/screens/withdrawals/withdrawals_screen.dart';
@@ -36,10 +35,6 @@ class AppPages {
     GetPage(
       name: Routes.users,
       page: () => UsersScreen(Get.find()),
-    ),
-    GetPage(
-      name: Routes.userWallets,
-      page: () => const UserWallets(),
     ),
     GetPage(
       name: Routes.myProfile,

@@ -116,13 +116,6 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             DrawerTile(
-              text: "User Wallets",
-              icon: Icons.person,
-              onTap: () {
-                Get.toNamed(Routes.userWallets);
-              },
-            ),
-            DrawerTile(
               text: "Deposits",
               icon: Icons.account_balance_wallet,
               onTap: () {
