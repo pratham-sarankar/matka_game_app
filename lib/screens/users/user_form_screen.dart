@@ -27,7 +27,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.user.toMap());
     return Scaffold(
       appBar: AppBar(
         title: const Text("User Details"),

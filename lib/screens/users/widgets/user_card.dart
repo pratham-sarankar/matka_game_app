@@ -59,7 +59,9 @@ class UserCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      user.email,
+                      user.phoneNumber.isNotEmpty == true
+                          ? user.phoneNumber
+                          : '',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.black54,
@@ -78,8 +80,8 @@ class UserCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: user.role.isAdmin
-                          ? const Color(0xFFcd1b65).withOpacity(0.1)
-                          : Colors.blue.withOpacity(0.1),
+                          ? const Color(0xFFcd1b65).withValues(alpha: 0.1)
+                          : Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -101,8 +103,8 @@ class UserCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: user.isActive
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.red.withOpacity(0.1),
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

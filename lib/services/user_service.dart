@@ -77,7 +77,6 @@ class UserService extends GetxService {
       // Set initial mode to user's role
       mode.value = userData.value?.role ?? UserRole.user;
     } catch (e) {
-      print('Error fetching user data: $e');
       // Handle error appropriately
     }
   }

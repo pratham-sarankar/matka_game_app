@@ -36,7 +36,6 @@ class _MarketFormState extends State<MarketForm> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.market != null;
-    final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,7 +53,7 @@ class _MarketFormState extends State<MarketForm> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
+              Theme.of(context).primaryColor.withValues(alpha: 0.1),
               Colors.white,
             ],
           ),

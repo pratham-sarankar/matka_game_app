@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:matka_game_app/models/wallet_transaction.dart';
+import 'package:matka_game_app/services/user_service.dart';
 
 class WalletRepository {
   final String _collection = 'wallet_transactions';
+  final UserService _userService = Get.find<UserService>();
 
   Query<Map<String, dynamic>> query({
     double? minAmount,
@@ -13,11 +16,15 @@ class WalletRepository {
     WalletTransactionType? selectedType,
     WalletTransactionStatus? selectedStatus,
   }) {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection(_collection)
-        .where('userID', isEqualTo: userId)
         .orderBy('requestedAt', descending: true);
+
+    // Only filter by user ID if the current user is not an admin
+    if (!_userService.isAdmin) {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      query = query.where('userID', isEqualTo: userId);
+    }
 
     if (minAmount != null) {
       query = query.where('amount', isGreaterThanOrEqualTo: minAmount);

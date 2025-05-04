@@ -35,7 +35,7 @@ class _MarketCardState extends State<MarketCard> {
         borderOnForeground: true,
         clipBehavior: Clip.hardEdge,
         elevation: 8,
-        shadowColor: const Color(0xffc6a179).withOpacity(0.5),
+        shadowColor: const Color(0xffc6a179).withValues(alpha: 0.5),
         child: Column(
           children: [
             Container(
@@ -53,7 +53,7 @@ class _MarketCardState extends State<MarketCard> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xffcb1964).withOpacity(0.3),
+                    color: const Color(0xffcb1964).withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -91,7 +91,7 @@ class _MarketCardState extends State<MarketCard> {
                                 height: 1.5,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withValues(alpha: 0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 4,
                                   ),
@@ -101,11 +101,11 @@ class _MarketCardState extends State<MarketCard> {
                             Text(
                               '168-54-130',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: size.height * 0.020,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withValues(alpha: 0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 4,
                                   ),
@@ -135,8 +135,8 @@ class _MarketCardState extends State<MarketCard> {
                               backgroundColor: const Color(0xff258435),
                               foregroundColor: Colors.white,
                               elevation: 4,
-                              shadowColor:
-                                  const Color(0xff258435).withOpacity(0.5),
+                              shadowColor: const Color(0xff258435)
+                                  .withValues(alpha: 0.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -183,7 +183,7 @@ class _MarketCardState extends State<MarketCard> {
                 color: const Color(0xffc6a179),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xffc6a179).withOpacity(0.3),
+                    color: const Color(0xffc6a179).withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, -2),
                   ),
@@ -203,13 +203,13 @@ class _MarketCardState extends State<MarketCard> {
                     ),
                     decoration: BoxDecoration(
                       color: widget.market.isOpen
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.red.withOpacity(0.2),
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.red.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: widget.market.isOpen
-                            ? Colors.green.withOpacity(0.5)
-                            : Colors.red.withOpacity(0.5),
+                            ? Colors.green.withValues(alpha: 0.5)
+                            : Colors.red.withValues(alpha: 0.5),
                         width: 1,
                       ),
                     ),

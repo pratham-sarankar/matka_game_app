@@ -7,4 +7,5 @@ class Routes {
   static const String myWallet = '/my-wallet';
   static const String users = '/users';
   static const String userWallets = '/user-wallets';
+  static const String deposits = '/deposits';
 }

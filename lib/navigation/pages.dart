@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:matka_game_app/screens/change_password/presentation/screens/change_password_screen.dart';
+import 'package:matka_game_app/screens/deposits/deposits_screen.dart';
 import 'package:matka_game_app/screens/home/presentation/screens/home_screen.dart';
 import 'package:matka_game_app/screens/auth/login_screen.dart';
 import 'package:matka_game_app/screens/markets/market_screen.dart';
@@ -42,6 +43,10 @@ class AppPages {
     GetPage(
       name: Routes.myProfile,
       page: () => const UserProfileScreen(),
+    ),
+    GetPage(
+      name: Routes.deposits,
+      page: () => const DepositsScreen(),
     ),
   ];
 }

@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/screens/markets/market_form.dart';
-import 'package:matka_game_app/widgets/gradient_button.dart';
 
 class MarketScreen extends StatelessWidget {
   const MarketScreen({super.key});
@@ -28,7 +27,7 @@ class MarketScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
+              Theme.of(context).primaryColor.withValues(alpha: 0.1),
               Colors.white,
             ],
           ),
@@ -226,34 +225,36 @@ class MarketScreen extends StatelessWidget {
 
   Widget _buildOpenDays(String openDays) {
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (var i = 0; i < 7; i++)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              color: openDays[i] == '1'
-                  ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
-                  : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              days[i],
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        spacing: 8,
+        children: [
+          for (var i = 0; i < 7; i++)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
                 color: openDays[i] == '1'
-                    ? Theme.of(Get.context!).primaryColor
-                    : Colors.grey.shade600,
+                    ? Theme.of(Get.context!).primaryColor.withValues(alpha: 0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                days[i],
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: openDays[i] == '1'
+                      ? Theme.of(Get.context!).primaryColor
+                      : Colors.grey.shade600,
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

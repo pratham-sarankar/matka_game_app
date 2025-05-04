@@ -131,21 +131,15 @@ class Market {
     final openMinutes = openTime.hour * 60 + openTime.minute;
     final closeMinutes = closeTime.hour * 60 + closeTime.minute;
 
-    print('Current Minutes: $currentMinutes');
-    print('Open Minutes: $openMinutes');
-    print('Close Minutes: $closeMinutes');
-
     if (closeMinutes < openMinutes) {
       // Market spans across midnight
       final isOpen =
           currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
-      print('Market spans midnight. Is Open: $isOpen');
       return isOpen;
     } else {
       // Market opens and closes on the same day
       final isOpen =
           currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
-      print('Market same day. Is Open: $isOpen');
       return isOpen;
     }
   }

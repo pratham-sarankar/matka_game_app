@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/inactive_user_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ActiveUserCheck extends StatefulWidget {
   final Widget child;

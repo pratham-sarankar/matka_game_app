@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,66 +21,6 @@ class _UserWalletsState extends State<UserWallets> {
   DateTime? toDate;
   WalletTransactionType? selectedType;
   WalletTransactionStatus? selectedStatus;
-
-  Future<void> _updateTransactionStatus(
-    WalletTransaction transaction,
-    WalletTransactionStatus newStatus,
-  ) async {
-    try {
-      final batch = FirebaseFirestore.instance.batch();
-
-      // Update transaction status
-      final transactionRef = FirebaseFirestore.instance
-          .collection('wallet_transactions')
-          .doc(transaction.id);
-      batch.update(transactionRef, {
-        'status': newStatus.name,
-        'respondedAt': Timestamp.now(),
-      });
-
-      // If approved, update user's wallet balance
-      if (newStatus == WalletTransactionStatus.approved) {
-        final userRef = FirebaseFirestore.instance
-            .collection('users')
-            .doc(transaction.userID);
-
-        final userDoc = await userRef.get();
-        final currentBalance = userDoc.data()?['balance'] ?? 0.0;
-
-        double newBalance = currentBalance;
-        if (transaction.type == WalletTransactionType.deposit) {
-          newBalance += transaction.amount;
-        } else if (transaction.type == WalletTransactionType.withdrawal) {
-          newBalance -= transaction.amount;
-        }
-
-        batch.update(userRef, {'balance': newBalance});
-      }
-
-      await batch.commit();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Transaction ${newStatus.name.toLowerCase()} successfully'),
-            backgroundColor: newStatus == WalletTransactionStatus.approved
-                ? Colors.green
-                : Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +140,8 @@ class _UserWalletsState extends State<UserWallets> {
                             decoration: BoxDecoration(
                               color: transaction.type ==
                                       WalletTransactionType.deposit
-                                  ? Colors.green.withOpacity(0.1)
-                                  : Colors.red.withOpacity(0.1),
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -248,7 +187,8 @@ class _UserWalletsState extends State<UserWallets> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: transaction.status.color.withOpacity(0.1),
+                              color: transaction.status.color
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
