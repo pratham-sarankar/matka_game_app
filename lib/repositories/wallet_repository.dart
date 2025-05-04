@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:matka_game_app/models/wallet_transaction.dart';
 import 'package:matka_game_app/services/user_service.dart';
+import 'package:matka_game_app/utils/errors/request_limit_exception.dart';
 
 class WalletRepository {
   final String _collection = 'wallet_transactions';
@@ -48,17 +49,42 @@ class WalletRepository {
     return query;
   }
 
-  Future<void> addTransaction(WalletTransaction transaction) async {
-    transaction.requestedAt = Timestamp.now();
-    await FirebaseFirestore.instance
-        .collection(_collection)
-        .add(transaction.toMap());
-  }
-
   Future<void> deleteTransaction(WalletTransaction transaction) {
     return FirebaseFirestore.instance
         .collection(_collection)
         .doc(transaction.id)
         .delete();
+  }
+
+  Future<int> _getTodayRequestCount() async {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final query = FirebaseFirestore.instance
+        .collection(_collection)
+        .where('userID', isEqualTo: userId)
+        .where('requestedAt', isGreaterThanOrEqualTo: startOfDay)
+        .where('requestedAt', isLessThan: endOfDay);
+
+    final snapshot = await query.get();
+    return snapshot.docs.length;
+  }
+
+  Future<void> addWalletTransaction(WalletTransaction transaction) async {
+    // Check request limit before adding transaction
+    final requestCount = await _getTodayRequestCount();
+
+    if (requestCount >= 10) {
+      throw RequestLimitException(
+        'You have reached the daily limit of 10 ${transaction.type.name.toLowerCase()} requests. Please try again tomorrow.',
+      );
+    }
+
+    // Continue with existing transaction creation logic
+    transaction.requestedAt = Timestamp.now();
+    await FirebaseFirestore.instance
+        .collection(_collection)
+        .add(transaction.toMap());
   }
 }

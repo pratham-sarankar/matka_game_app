@@ -7,6 +7,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:firebase_ui_storage/firebase_ui_storage.dart';
 import 'package:matka_game_app/models/wallet_transaction.dart';
 import 'package:matka_game_app/repositories/wallet_repository.dart';
+import 'package:matka_game_app/utils/errors/request_limit_exception.dart';
 import 'package:matka_game_app/utils/widget_list.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
@@ -105,9 +106,23 @@ class _TransactionFormState extends State<TransactionForm> {
       _formKey.currentState?.save();
       setState(() => _isLoading = true);
       try {
-        await _repository.addTransaction(_transaction);
+        await _repository.addWalletTransaction(_transaction);
         if (mounted) {
           Navigator.of(context).pop();
+        }
+      } on RequestLimitException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
         }
       } finally {
         if (mounted) {
