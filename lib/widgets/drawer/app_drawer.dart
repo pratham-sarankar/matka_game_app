@@ -129,6 +129,13 @@ class AppDrawer extends StatelessWidget {
                 Get.toNamed(Routes.deposits);
               },
             ),
+            DrawerTile(
+              text: "Withdrawals",
+              icon: Icons.account_balance_wallet_outlined,
+              onTap: () {
+                Get.toNamed(Routes.withdrawals);
+              },
+            ),
           ] else ...[
             DrawerTile(
               text: "Home",

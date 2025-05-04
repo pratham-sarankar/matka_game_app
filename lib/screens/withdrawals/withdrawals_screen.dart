@@ -5,14 +5,14 @@ import 'package:matka_game_app/models/wallet_transaction.dart';
 import 'package:matka_game_app/repositories/wallet_repository.dart';
 import 'package:matka_game_app/screens/user_wallets/transaction_details_screen.dart';
 
-class DepositsScreen extends StatefulWidget {
-  const DepositsScreen({super.key});
+class WithdrawalsScreen extends StatefulWidget {
+  const WithdrawalsScreen({super.key});
 
   @override
-  State<DepositsScreen> createState() => _DepositsScreenState();
+  State<WithdrawalsScreen> createState() => _WithdrawalsScreenState();
 }
 
-class _DepositsScreenState extends State<DepositsScreen>
+class _WithdrawalsScreenState extends State<WithdrawalsScreen>
     with SingleTickerProviderStateMixin {
   final WalletRepository _walletRepository = WalletRepository();
   late TabController _tabController;
@@ -34,7 +34,7 @@ class _DepositsScreenState extends State<DepositsScreen>
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Deposits"),
+        title: const Text("Withdrawals"),
         bottom: TabBar(
           controller: _tabController,
           labelColor: theme.colorScheme.onPrimary,
@@ -67,7 +67,7 @@ class _DepositsScreenState extends State<DepositsScreen>
       },
       child: FirestoreListView<Map<String, dynamic>>(
         query: _walletRepository.query(
-          selectedType: WalletTransactionType.deposit,
+          selectedType: WalletTransactionType.withdrawal,
           selectedStatus: status,
         ),
         emptyBuilder: (context) => Center(
@@ -81,7 +81,7 @@ class _DepositsScreenState extends State<DepositsScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'No ${status.name.toLowerCase()} deposits found',
+                'No ${status.name.toLowerCase()} withdrawals found',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -136,13 +136,13 @@ class _DepositsScreenState extends State<DepositsScreen>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary
-                                .withValues(alpha: 0.1),
+                            color:
+                                theme.colorScheme.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            Icons.arrow_downward,
-                            color: theme.colorScheme.primary,
+                            Icons.arrow_upward,
+                            color: theme.colorScheme.error,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -151,9 +151,9 @@ class _DepositsScreenState extends State<DepositsScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "+ ₹${transaction.amount}",
+                                "- ₹${transaction.amount}",
                                 style: TextStyle(
-                                  color: theme.colorScheme.primary,
+                                  color: theme.colorScheme.error,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
