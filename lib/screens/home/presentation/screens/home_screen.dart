@@ -11,6 +11,8 @@ import 'package:matka_game_app/utils/user_role.dart';
 import 'package:matka_game_app/widgets/active_user_check.dart';
 import 'package:matka_game_app/widgets/balance_widget.dart';
 import 'package:matka_game_app/widgets/drawer/app_drawer.dart';
+import 'package:matka_game_app/screens/my_wallet/transaction_form.dart';
+import 'package:matka_game_app/models/wallet_transaction.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(this.userService, {super.key});
@@ -54,30 +56,30 @@ class _HomeScreenState extends State<HomeScreen> {
               horizontal: width * 0.05,
             ),
             children: [
-              const SizedBox(height: 20),
-              AspectRatio(
-                aspectRatio: 100 / 50,
-                child: Container(
-                  width: width,
-                  decoration: BoxDecoration(
-                    color: const Color(0xff770e66),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xfffcdfa1),
-                      width: 2,
-                    ),
-                    gradient: const RadialGradient(
-                      center: Alignment.center,
-                      radius: 1,
-                      colors: [
-                        Color(0xffcb1964),
-                        Color(0xffab1865),
-                        Color(0xff770e66),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // const SizedBox(height: 20),
+              // AspectRatio(
+              //   aspectRatio: 100 / 50,
+              //   child: Container(
+              //     width: width,
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xff770e66),
+              //       borderRadius: BorderRadius.circular(8),
+              //       border: Border.all(
+              //         color: const Color(0xfffcdfa1),
+              //         width: 2,
+              //       ),
+              //       gradient: const RadialGradient(
+              //         center: Alignment.center,
+              //         radius: 1,
+              //         colors: [
+              //           Color(0xffcb1964),
+              //           Color(0xffab1865),
+              //           Color(0xff770e66),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 18),
               GridView.count(
                 padding: EdgeInsets.zero,
@@ -96,12 +98,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   HomeButton(
                     text: 'Add Money',
                     icon: Image.asset('assets/images/plus_coin.png'),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionForm(
+                            transaction: WalletTransaction(
+                              id: "",
+                              userID: widget.userService.currentUserId,
+                              amount: 0,
+                              type: WalletTransactionType.deposit,
+                              note: "",
+                              status: WalletTransactionStatus.pending,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   HomeButton(
                     text: 'Withdraw',
                     icon: Image.asset('assets/images/minus_coin.png'),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionForm(
+                            transaction: WalletTransaction(
+                              id: "",
+                              userID: widget.userService.currentUserId,
+                              amount: 0,
+                              type: WalletTransactionType.withdrawal,
+                              note: "",
+                              status: WalletTransactionStatus.pending,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   HomeButton(
                     text: 'How to play',
