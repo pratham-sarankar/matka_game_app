@@ -151,4 +151,9 @@ class UserRepository {
     final doc = await _getCollection().doc(userEmail).get();
     return doc.data();
   }
+
+  Future<UserData?> getUserByUid(String uid) async {
+    final doc = await _getCollection().doc(uid).get();
+    return doc.data();
+  }
 }
