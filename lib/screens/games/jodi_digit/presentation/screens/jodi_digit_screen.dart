@@ -11,12 +11,12 @@ import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class SingleDigitScreen extends StatefulWidget {
+class JodiDigitScreen extends StatefulWidget {
   final Market market;
   final UserService userService;
   final Bid? bid; // If provided, we're in view/edit mode
 
-  const SingleDigitScreen({
+  const JodiDigitScreen({
     super.key,
     required this.market,
     required this.userService,
@@ -24,10 +24,10 @@ class SingleDigitScreen extends StatefulWidget {
   });
 
   @override
-  State<SingleDigitScreen> createState() => _SingleDigitScreenState();
+  State<JodiDigitScreen> createState() => _JodiDigitScreenState();
 }
 
-class _SingleDigitScreenState extends State<SingleDigitScreen> {
+class _JodiDigitScreenState extends State<JodiDigitScreen> {
   final _bidRepository = BidRepository();
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
@@ -47,7 +47,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         id: widget.bid?.id ?? '', // Will be set by Firestore for new bids
         userId: widget.userService.currentUserId,
         marketId: widget.market.id,
-        gameType: 'Single Digit',
+        gameType: 'Jodi Digit',
         digit: formData['digit'],
         amount: double.parse(formData['amount']),
         timestamp: widget.bid?.timestamp ?? DateTime.now(),
@@ -136,7 +136,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         enabled: !_isViewMode,
         initialValue: widget.bid != null
             ? {
-                'digit': widget.bid!.digit.toString(),
+                'digit': widget.bid!.digit.toString().padLeft(2, '0'),
                 'amount': widget.bid!.amount.toString(),
                 'session': widget.bid!.session,
               }
@@ -230,9 +230,9 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
             FormBuilderTextField(
               name: 'digit',
               keyboardType: TextInputType.number,
-              maxLength: 1,
+              maxLength: 2,
               decoration: InputDecoration(
-                hintText: "Enter Bid Digit (0-9)",
+                hintText: "Enter Jodi Digit (00-99)",
                 hintStyle: GoogleFonts.poppins(
                   color: Colors.grey.shade800,
                   fontSize: 18,
@@ -243,18 +243,18 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter a digit',
+                  errorText: 'Please enter a jodi digit',
                 ),
                 FormBuilderValidators.numeric(
                   errorText: 'Please enter a valid number',
                 ),
                 (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a digit';
+                    return 'Please enter a jodi digit';
                   }
                   final digit = int.tryParse(value);
-                  if (digit == null || digit < 0 || digit > 9) {
-                    return 'Digit must be between 0 and 9';
+                  if (digit == null || digit < 0 || digit > 99) {
+                    return 'Jodi digit must be between 00 and 99';
                   }
                   return null;
                 },

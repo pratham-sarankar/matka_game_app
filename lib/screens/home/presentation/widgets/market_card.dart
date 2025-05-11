@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:matka_game_app/models/market.dart';
+import 'package:matka_game_app/screens/game_list/presentation/game_list_screen.dart';
+import 'package:matka_game_app/services/user_service.dart';
 
 class MarketCard extends StatefulWidget {
   const MarketCard({
     super.key,
     required this.market,
-    required this.onPlay,
+    required this.userService,
     this.onTap,
   });
 
   final Market market;
+  final UserService userService;
   final VoidCallback? onTap;
-  final VoidCallback onPlay;
 
   @override
   State<MarketCard> createState() => _MarketCardState();
 }
 
 class _MarketCardState extends State<MarketCard> {
+  void _navigateToGameList() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameListScreen(
+          market: widget.market,
+          userService: widget.userService,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -35,7 +49,6 @@ class _MarketCardState extends State<MarketCard> {
         borderOnForeground: true,
         clipBehavior: Clip.hardEdge,
         elevation: 8,
-        shadowColor: const Color(0xffc6a179).withValues(alpha: 0.5),
         child: Column(
           children: [
             Container(
@@ -72,7 +85,6 @@ class _MarketCardState extends State<MarketCard> {
                     bottom: 5,
                     child: Image.asset(
                       'assets/images/growth.png',
-                      // height: size.height * 0.0,
                     ),
                   ),
                   Center(
@@ -91,7 +103,7 @@ class _MarketCardState extends State<MarketCard> {
                                 height: 1.5,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withValues(alpha: 0.3),
+                                    color: Colors.black.withOpacity(0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 4,
                                   ),
@@ -101,11 +113,11 @@ class _MarketCardState extends State<MarketCard> {
                             Text(
                               '168-54-130',
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
+                                color: Colors.white.withOpacity(0.9),
                                 fontSize: size.height * 0.020,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withValues(alpha: 0.3),
+                                    color: Colors.black.withOpacity(0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 4,
                                   ),
@@ -126,7 +138,7 @@ class _MarketCardState extends State<MarketCard> {
                       children: [
                         if (widget.market.isOpen)
                           ElevatedButton(
-                            onPressed: widget.onPlay,
+                            onPressed: _navigateToGameList,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -135,8 +147,8 @@ class _MarketCardState extends State<MarketCard> {
                               backgroundColor: const Color(0xff258435),
                               foregroundColor: Colors.white,
                               elevation: 4,
-                              shadowColor: const Color(0xff258435)
-                                  .withValues(alpha: 0.5),
+                              shadowColor:
+                                  const Color(0xff258435).withOpacity(0.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -154,10 +166,10 @@ class _MarketCardState extends State<MarketCard> {
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.2),
+                              color: Colors.red.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.red.withValues(alpha: 0.5),
+                                color: Colors.red.withOpacity(0.5),
                                 width: 1,
                               ),
                             ),
@@ -183,7 +195,7 @@ class _MarketCardState extends State<MarketCard> {
                 color: const Color(0xffc6a179),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xffc6a179).withValues(alpha: 0.3),
+                    color: const Color(0xffc6a179).withOpacity(0.3),
                     blurRadius: 4,
                     offset: const Offset(0, -2),
                   ),
@@ -203,13 +215,13 @@ class _MarketCardState extends State<MarketCard> {
                     ),
                     decoration: BoxDecoration(
                       color: widget.market.isOpen
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.red.withValues(alpha: 0.2),
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: widget.market.isOpen
-                            ? Colors.green.withValues(alpha: 0.5)
-                            : Colors.red.withValues(alpha: 0.5),
+                            ? Colors.green.withOpacity(0.5)
+                            : Colors.red.withOpacity(0.5),
                         width: 1,
                       ),
                     ),

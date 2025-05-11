@@ -159,9 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.only(bottom: 18),
                     child: MarketCard(
                       market: market,
-                      onPlay: () {
-                        // TODO: Implement play functionality
-                      },
+                      userService: widget.userService,
                       onTap: () {
                         // TODO: Implement market details navigation
                       },

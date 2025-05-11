@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GameListCard extends StatefulWidget {
   const GameListCard({
@@ -15,64 +16,124 @@ class GameListCard extends StatefulWidget {
 }
 
 class _GameListCardState extends State<GameListCard> {
+  bool _isPressed = false;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: Container(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
         decoration: BoxDecoration(
-          color: const Color(0xff770e66),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: const Color(0xfffcdfa1),
-            width: 1,
-          ),
-          gradient: const RadialGradient(
-            center: Alignment.center,
-            radius: 0.5,
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
               Color(0xffcb1964),
               Color(0xffab1865),
               Color(0xff770e66),
             ],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xff770e66).withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: const Color(0xfffcdfa1),
+            width: 1.5,
+          ),
         ),
-        padding: const EdgeInsets.only(
-          top: 14,
-          bottom: 14,
-          right: 14,
-          left: 5,
-        ),
-        child: LayoutBuilder(builder: (context, constraints) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
             children: [
-              SizedBox(
-                width: constraints.maxWidth * 0.45,
-                child: AspectRatio(
-                  aspectRatio: 100 / 110,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xffeecf87),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: widget.icon,
+              // Background pattern
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.1,
+                  child: CustomPaint(
+                    painter: PatternPainter(),
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
-              Text(
-                widget.text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+              // Content
+              Positioned.fill(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: constraints.maxWidth * 0.8,
+                          height: constraints.maxWidth * 0.6,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: widget.icon,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.text,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
-          );
-        }),
+          ),
+        ),
       ),
     );
   }
+}
+
+class PatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    const spacing = 20.0;
+    for (var i = 0.0; i < size.width; i += spacing) {
+      for (var j = 0.0; j < size.height; j += spacing) {
+        canvas.drawCircle(Offset(i, j), 1, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -11,12 +11,12 @@ import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class SingleDigitScreen extends StatefulWidget {
+class TriplePannaScreen extends StatefulWidget {
   final Market market;
   final UserService userService;
   final Bid? bid; // If provided, we're in view/edit mode
 
-  const SingleDigitScreen({
+  const TriplePannaScreen({
     super.key,
     required this.market,
     required this.userService,
@@ -24,10 +24,10 @@ class SingleDigitScreen extends StatefulWidget {
   });
 
   @override
-  State<SingleDigitScreen> createState() => _SingleDigitScreenState();
+  State<TriplePannaScreen> createState() => _TriplePannaScreenState();
 }
 
-class _SingleDigitScreenState extends State<SingleDigitScreen> {
+class _TriplePannaScreenState extends State<TriplePannaScreen> {
   final _bidRepository = BidRepository();
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
@@ -47,7 +47,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         id: widget.bid?.id ?? '', // Will be set by Firestore for new bids
         userId: widget.userService.currentUserId,
         marketId: widget.market.id,
-        gameType: 'Single Digit',
+        gameType: 'Triple Panna',
         digit: formData['digit'],
         amount: double.parse(formData['amount']),
         timestamp: widget.bid?.timestamp ?? DateTime.now(),
@@ -104,6 +104,67 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
     );
   }
 
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'How to Play Triple Panna',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rules:',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '• Enter a 3-digit number (000-999)\n'
+              '• All three digits must be identical\n'
+              '• Example: 000, 111, 222, 333, etc.',
+              style: GoogleFonts.poppins(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Winning Ratio:',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '• Bet ₹10 to win ₹5000\n'
+              '• Bet ₹100 to win ₹50000\n'
+              '• And so on...',
+              style: GoogleFonts.poppins(fontSize: 14),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Got it',
+              style: GoogleFonts.poppins(
+                color: Colors.blue,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,6 +183,10 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(CupertinoIcons.question_circle),
+            onPressed: _showHelpDialog,
+          ),
           if (_isViewMode)
             IconButton(
               icon: const Icon(Icons.edit),
@@ -136,7 +201,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         enabled: !_isViewMode,
         initialValue: widget.bid != null
             ? {
-                'digit': widget.bid!.digit.toString(),
+                'digit': widget.bid!.digit,
                 'amount': widget.bid!.amount.toString(),
                 'session': widget.bid!.session,
               }
@@ -230,9 +295,9 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
             FormBuilderTextField(
               name: 'digit',
               keyboardType: TextInputType.number,
-              maxLength: 1,
+              maxLength: 3,
               decoration: InputDecoration(
-                hintText: "Enter Bid Digit (0-9)",
+                hintText: "Enter Triple Panna Digit (e.g., 000, 111, 222)",
                 hintStyle: GoogleFonts.poppins(
                   color: Colors.grey.shade800,
                   fontSize: 18,
@@ -240,21 +305,35 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                helperText:
+                    'Must have all three digits identical (e.g., 000, 111, 222)',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter a digit',
+                  errorText: 'Please enter a triple panna digit',
                 ),
                 FormBuilderValidators.numeric(
                   errorText: 'Please enter a valid number',
                 ),
                 (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a digit';
+                    return 'Please enter a triple panna digit';
                   }
                   final digit = int.tryParse(value);
-                  if (digit == null || digit < 0 || digit > 9) {
-                    return 'Digit must be between 0 and 9';
+                  if (digit == null || digit < 0 || digit > 999) {
+                    return 'Triple panna digit must be between 000 and 999';
+                  }
+                  // Check if all digits are identical
+                  final digits = value.split('');
+                  if (digits.length != 3) {
+                    return 'Please enter exactly 3 digits';
+                  }
+                  if (digits[0] != digits[1] || digits[1] != digits[2]) {
+                    return 'All three digits must be identical (e.g., 000, 111, 222)';
                   }
                   return null;
                 },
@@ -272,6 +351,11 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Win ₹5000 for every ₹10 bet',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
                 ),
               ),
               validator: FormBuilderValidators.compose([

@@ -11,12 +11,12 @@ import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class SingleDigitScreen extends StatefulWidget {
+class FamilyJodiScreen extends StatefulWidget {
   final Market market;
   final UserService userService;
   final Bid? bid; // If provided, we're in view/edit mode
 
-  const SingleDigitScreen({
+  const FamilyJodiScreen({
     super.key,
     required this.market,
     required this.userService,
@@ -24,10 +24,10 @@ class SingleDigitScreen extends StatefulWidget {
   });
 
   @override
-  State<SingleDigitScreen> createState() => _SingleDigitScreenState();
+  State<FamilyJodiScreen> createState() => _FamilyJodiScreenState();
 }
 
-class _SingleDigitScreenState extends State<SingleDigitScreen> {
+class _FamilyJodiScreenState extends State<FamilyJodiScreen> {
   final _bidRepository = BidRepository();
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
@@ -43,15 +43,20 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
 
+      // Combine both digits with a separator
+      final firstDigit = formData['firstDigit'];
+      final secondDigit = formData['secondDigit'];
+      final combinedDigit = '$firstDigit|$secondDigit';
+
       final bid = Bid(
         id: widget.bid?.id ?? '', // Will be set by Firestore for new bids
         userId: widget.userService.currentUserId,
         marketId: widget.market.id,
-        gameType: 'Single Digit',
-        digit: formData['digit'],
+        gameType: 'Family Jodi',
+        digit: combinedDigit,
         amount: double.parse(formData['amount']),
         timestamp: widget.bid?.timestamp ?? DateTime.now(),
-        session: formData['session'] as String,
+        session: 'close', // Family Jodi is always for close session
         status: widget.bid?.status ?? BidStatus.pending,
       );
 
@@ -106,6 +111,17 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Parse existing bid if in view mode
+    String? initialFirstDigit;
+    String? initialSecondDigit;
+    if (widget.bid != null) {
+      final parts = widget.bid!.digit.split('|');
+      if (parts.length == 2) {
+        initialFirstDigit = parts[0];
+        initialSecondDigit = parts[1];
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -136,13 +152,11 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         enabled: !_isViewMode,
         initialValue: widget.bid != null
             ? {
-                'digit': widget.bid!.digit.toString(),
+                'firstDigit': initialFirstDigit,
+                'secondDigit': initialSecondDigit,
                 'amount': widget.bid!.amount.toString(),
-                'session': widget.bid!.session,
               }
-            : {
-                'session': 'open',
-              },
+            : {},
         child: ListView(
           padding: const EdgeInsets.symmetric(
             vertical: 20,
@@ -200,39 +214,19 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Choose Session",
+              "First Number (2-digit)",
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            FormBuilderRadioGroup<String>(
-              name: 'session',
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              options: const [
-                FormBuilderFieldOption(
-                  value: 'open',
-                  child: Text('Open'),
-                ),
-                FormBuilderFieldOption(
-                  value: 'close',
-                  child: Text('Close'),
-                ),
-              ],
-              initialValue: 'open',
-              validator: FormBuilderValidators.required(
-                errorText: 'Please select a session',
-              ),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             FormBuilderTextField(
-              name: 'digit',
+              name: 'firstDigit',
               keyboardType: TextInputType.number,
-              maxLength: 1,
+              maxLength: 2,
               decoration: InputDecoration(
-                hintText: "Enter Bid Digit (0-9)",
+                hintText: "Enter 2-digit number (00-99)",
                 hintStyle: GoogleFonts.poppins(
                   color: Colors.grey.shade800,
                   fontSize: 18,
@@ -240,21 +234,85 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                helperText: 'Enter any 2-digit number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter a digit',
+                  errorText: 'Please enter a 2-digit number',
                 ),
                 FormBuilderValidators.numeric(
                   errorText: 'Please enter a valid number',
                 ),
                 (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a digit';
+                    return 'Please enter a 2-digit number';
                   }
                   final digit = int.tryParse(value);
-                  if (digit == null || digit < 0 || digit > 9) {
-                    return 'Digit must be between 0 and 9';
+                  if (digit == null || digit < 0 || digit > 99) {
+                    return 'Number must be between 00 and 99';
+                  }
+                  if (value.length != 2) {
+                    return 'Please enter exactly 2 digits';
+                  }
+                  return null;
+                },
+              ]),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Second Number (2-digit)",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 5),
+            FormBuilderTextField(
+              name: 'secondDigit',
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              decoration: InputDecoration(
+                hintText: "Enter 2-digit number (00-99)",
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade800,
+                  fontSize: 18,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Must be different from first number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(
+                  errorText: 'Please enter a 2-digit number',
+                ),
+                FormBuilderValidators.numeric(
+                  errorText: 'Please enter a valid number',
+                ),
+                (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a 2-digit number';
+                  }
+                  final digit = int.tryParse(value);
+                  if (digit == null || digit < 0 || digit > 99) {
+                    return 'Number must be between 00 and 99';
+                  }
+                  if (value.length != 2) {
+                    return 'Please enter exactly 2 digits';
+                  }
+                  // Check if second number is different from first number
+                  final firstDigit =
+                      _formKey.currentState?.fields['firstDigit']?.value;
+                  if (firstDigit == value) {
+                    return 'Second number must be different from first number';
                   }
                   return null;
                 },

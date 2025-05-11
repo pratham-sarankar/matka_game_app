@@ -11,12 +11,12 @@ import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class SingleDigitScreen extends StatefulWidget {
+class DoublePannaScreen extends StatefulWidget {
   final Market market;
   final UserService userService;
   final Bid? bid; // If provided, we're in view/edit mode
 
-  const SingleDigitScreen({
+  const DoublePannaScreen({
     super.key,
     required this.market,
     required this.userService,
@@ -24,10 +24,10 @@ class SingleDigitScreen extends StatefulWidget {
   });
 
   @override
-  State<SingleDigitScreen> createState() => _SingleDigitScreenState();
+  State<DoublePannaScreen> createState() => _DoublePannaScreenState();
 }
 
-class _SingleDigitScreenState extends State<SingleDigitScreen> {
+class _DoublePannaScreenState extends State<DoublePannaScreen> {
   final _bidRepository = BidRepository();
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
@@ -47,7 +47,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         id: widget.bid?.id ?? '', // Will be set by Firestore for new bids
         userId: widget.userService.currentUserId,
         marketId: widget.market.id,
-        gameType: 'Single Digit',
+        gameType: 'Double Panna',
         digit: formData['digit'],
         amount: double.parse(formData['amount']),
         timestamp: widget.bid?.timestamp ?? DateTime.now(),
@@ -136,7 +136,7 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         enabled: !_isViewMode,
         initialValue: widget.bid != null
             ? {
-                'digit': widget.bid!.digit.toString(),
+                'digit': widget.bid!.digit,
                 'amount': widget.bid!.amount.toString(),
                 'session': widget.bid!.session,
               }
@@ -230,9 +230,9 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
             FormBuilderTextField(
               name: 'digit',
               keyboardType: TextInputType.number,
-              maxLength: 1,
+              maxLength: 3,
               decoration: InputDecoration(
-                hintText: "Enter Bid Digit (0-9)",
+                hintText: "Enter Double Panna Digit",
                 hintStyle: GoogleFonts.poppins(
                   color: Colors.grey.shade800,
                   fontSize: 18,
@@ -240,21 +240,39 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                helperText:
+                    'Must have exactly two identical digits (e.g., 112, 221)',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter a digit',
+                  errorText: 'Please enter a double panna digit',
                 ),
                 FormBuilderValidators.numeric(
                   errorText: 'Please enter a valid number',
                 ),
                 (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a digit';
+                    return 'Please enter a double panna digit';
                   }
                   final digit = int.tryParse(value);
-                  if (digit == null || digit < 0 || digit > 9) {
-                    return 'Digit must be between 0 and 9';
+                  if (digit == null || digit < 0 || digit > 999) {
+                    return 'Double panna digit must be between 000 and 999';
+                  }
+                  // Check if the number has exactly two identical digits
+                  final digits = value.split('');
+                  final digitCounts = <String, int>{};
+                  for (final d in digits) {
+                    digitCounts[d] = (digitCounts[d] ?? 0) + 1;
+                  }
+                  if (digitCounts.length != 2) {
+                    return 'Double panna must have exactly two identical digits and one different digit';
+                  }
+                  if (!digitCounts.values.contains(2)) {
+                    return 'Double panna must have exactly two identical digits';
                   }
                   return null;
                 },

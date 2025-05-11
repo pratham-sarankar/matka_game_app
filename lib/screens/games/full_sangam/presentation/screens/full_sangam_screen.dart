@@ -11,12 +11,12 @@ import 'package:matka_game_app/services/user_service.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
-class SingleDigitScreen extends StatefulWidget {
+class FullSangamScreen extends StatefulWidget {
   final Market market;
   final UserService userService;
   final Bid? bid; // If provided, we're in view/edit mode
 
-  const SingleDigitScreen({
+  const FullSangamScreen({
     super.key,
     required this.market,
     required this.userService,
@@ -24,10 +24,10 @@ class SingleDigitScreen extends StatefulWidget {
   });
 
   @override
-  State<SingleDigitScreen> createState() => _SingleDigitScreenState();
+  State<FullSangamScreen> createState() => _FullSangamScreenState();
 }
 
-class _SingleDigitScreenState extends State<SingleDigitScreen> {
+class _FullSangamScreenState extends State<FullSangamScreen> {
   final _bidRepository = BidRepository();
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
@@ -43,15 +43,22 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
 
+      // Combine all digits with separators
+      final openPanna = formData['openPanna'];
+      final openPanel = formData['openPanel'];
+      final closePanna = formData['closePanna'];
+      final closePanel = formData['closePanel'];
+      final combinedDigit = '$openPanna|$openPanel|$closePanna|$closePanel';
+
       final bid = Bid(
         id: widget.bid?.id ?? '', // Will be set by Firestore for new bids
         userId: widget.userService.currentUserId,
         marketId: widget.market.id,
-        gameType: 'Single Digit',
-        digit: formData['digit'],
+        gameType: 'Full Sangam',
+        digit: combinedDigit,
         amount: double.parse(formData['amount']),
         timestamp: widget.bid?.timestamp ?? DateTime.now(),
-        session: formData['session'] as String,
+        session: 'full', // Full Sangam doesn't need session selection
         status: widget.bid?.status ?? BidStatus.pending,
       );
 
@@ -106,6 +113,21 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Parse existing bid if in view mode
+    String? initialOpenPanna;
+    String? initialOpenPanel;
+    String? initialClosePanna;
+    String? initialClosePanel;
+    if (widget.bid != null) {
+      final parts = widget.bid!.digit.split('|');
+      if (parts.length == 4) {
+        initialOpenPanna = parts[0];
+        initialOpenPanel = parts[1];
+        initialClosePanna = parts[2];
+        initialClosePanel = parts[3];
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -136,13 +158,13 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
         enabled: !_isViewMode,
         initialValue: widget.bid != null
             ? {
-                'digit': widget.bid!.digit.toString(),
+                'openPanna': initialOpenPanna,
+                'openPanel': initialOpenPanel,
+                'closePanna': initialClosePanna,
+                'closePanel': initialClosePanel,
                 'amount': widget.bid!.amount.toString(),
-                'session': widget.bid!.session,
               }
-            : {
-                'session': 'open',
-              },
+            : {},
         child: ListView(
           padding: const EdgeInsets.symmetric(
             vertical: 20,
@@ -200,39 +222,28 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Choose Session",
+              "Open Session",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xff530b47),
+              ),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Panna (3-digit)",
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            FormBuilderRadioGroup<String>(
-              name: 'session',
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-              ),
-              options: const [
-                FormBuilderFieldOption(
-                  value: 'open',
-                  child: Text('Open'),
-                ),
-                FormBuilderFieldOption(
-                  value: 'close',
-                  child: Text('Close'),
-                ),
-              ],
-              initialValue: 'open',
-              validator: FormBuilderValidators.required(
-                errorText: 'Please select a session',
-              ),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             FormBuilderTextField(
-              name: 'digit',
+              name: 'openPanna',
               keyboardType: TextInputType.number,
-              maxLength: 1,
+              maxLength: 3,
               decoration: InputDecoration(
-                hintText: "Enter Bid Digit (0-9)",
+                hintText: "Enter 3-digit number (000-999)",
                 hintStyle: GoogleFonts.poppins(
                   color: Colors.grey.shade800,
                   fontSize: 18,
@@ -240,21 +251,188 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                helperText: 'Enter any 3-digit number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
               ),
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(
-                  errorText: 'Please enter a digit',
+                  errorText: 'Please enter a 3-digit number',
                 ),
                 FormBuilderValidators.numeric(
                   errorText: 'Please enter a valid number',
                 ),
                 (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a digit';
+                    return 'Please enter a 3-digit number';
                   }
                   final digit = int.tryParse(value);
-                  if (digit == null || digit < 0 || digit > 9) {
-                    return 'Digit must be between 0 and 9';
+                  if (digit == null || digit < 0 || digit > 999) {
+                    return 'Number must be between 000 and 999';
+                  }
+                  if (value.length != 3) {
+                    return 'Please enter exactly 3 digits';
+                  }
+                  return null;
+                },
+              ]),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Panel (2-digit)",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 5),
+            FormBuilderTextField(
+              name: 'openPanel',
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              decoration: InputDecoration(
+                hintText: "Enter 2-digit number (00-99)",
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade800,
+                  fontSize: 18,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Enter any 2-digit number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(
+                  errorText: 'Please enter a 2-digit number',
+                ),
+                FormBuilderValidators.numeric(
+                  errorText: 'Please enter a valid number',
+                ),
+                (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a 2-digit number';
+                  }
+                  final digit = int.tryParse(value);
+                  if (digit == null || digit < 0 || digit > 99) {
+                    return 'Number must be between 00 and 99';
+                  }
+                  if (value.length != 2) {
+                    return 'Please enter exactly 2 digits';
+                  }
+                  return null;
+                },
+              ]),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "Close Session",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xff530b47),
+              ),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Panna (3-digit)",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 5),
+            FormBuilderTextField(
+              name: 'closePanna',
+              keyboardType: TextInputType.number,
+              maxLength: 3,
+              decoration: InputDecoration(
+                hintText: "Enter 3-digit number (000-999)",
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade800,
+                  fontSize: 18,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Enter any 3-digit number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(
+                  errorText: 'Please enter a 3-digit number',
+                ),
+                FormBuilderValidators.numeric(
+                  errorText: 'Please enter a valid number',
+                ),
+                (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a 3-digit number';
+                  }
+                  final digit = int.tryParse(value);
+                  if (digit == null || digit < 0 || digit > 999) {
+                    return 'Number must be between 000 and 999';
+                  }
+                  if (value.length != 3) {
+                    return 'Please enter exactly 3 digits';
+                  }
+                  return null;
+                },
+              ]),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              "Panel (2-digit)",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 5),
+            FormBuilderTextField(
+              name: 'closePanel',
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              decoration: InputDecoration(
+                hintText: "Enter 2-digit number (00-99)",
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade800,
+                  fontSize: 18,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Enter any 2-digit number',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(
+                  errorText: 'Please enter a 2-digit number',
+                ),
+                FormBuilderValidators.numeric(
+                  errorText: 'Please enter a valid number',
+                ),
+                (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a 2-digit number';
+                  }
+                  final digit = int.tryParse(value);
+                  if (digit == null || digit < 0 || digit > 99) {
+                    return 'Number must be between 00 and 99';
+                  }
+                  if (value.length != 2) {
+                    return 'Please enter exactly 2 digits';
                   }
                   return null;
                 },
@@ -272,6 +450,11 @@ class _SingleDigitScreenState extends State<SingleDigitScreen> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                ),
+                helperText: 'Win ₹15000 for every ₹10 bet',
+                helperStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
                 ),
               ),
               validator: FormBuilderValidators.compose([
