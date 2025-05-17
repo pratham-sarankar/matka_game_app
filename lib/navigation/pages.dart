@@ -6,6 +6,7 @@ import 'package:matka_game_app/screens/auth/login_screen.dart';
 import 'package:matka_game_app/screens/markets/market_screen.dart';
 import 'package:matka_game_app/navigation/routes.dart';
 import 'package:matka_game_app/screens/my_wallet/my_wallet_screen.dart';
+import 'package:matka_game_app/screens/notice_board/presentation/screens/admin_notice_board_screen.dart';
 import 'package:matka_game_app/screens/users/users_screen.dart';
 import 'package:matka_game_app/screens/profile/profile_screen.dart';
 import 'package:matka_game_app/screens/withdrawals/withdrawals_screen.dart';
@@ -53,6 +54,10 @@ class AppPages {
     GetPage(
       name: Routes.bidHistory,
       page: () => BidHistoryScreen(userService: Get.find<UserService>()),
+    ),
+    GetPage(
+      name: Routes.noticeBoard,
+      page: () => AdminNoticeBoardScreen(),
     ),
   ];
 }

@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:matka_game_app/screens/auth/login_screen.dart';
 import 'package:matka_game_app/utils/user_role.dart';
 import 'package:matka_game_app/screens/game_rates/presentation/screens/game_rates_screen.dart';
-import 'package:matka_game_app/screens/notice_board/presentation/screens/notice_board_screen.dart';
+import 'package:matka_game_app/screens/notice_board/presentation/screens/user_notice_board_screen.dart';
 import 'package:matka_game_app/screens/notification/presentation/screens/notification_screen.dart';
 import 'package:matka_game_app/screens/win_history/presentation/screens/win_history_screen.dart';
 import 'package:matka_game_app/navigation/routes.dart';
@@ -129,6 +129,11 @@ class AppDrawer extends StatelessWidget {
                 Get.toNamed(Routes.withdrawals);
               },
             ),
+            DrawerTile(
+              icon: CupertinoIcons.doc_text,
+              text: "Notice Board",
+              onTap: () => Get.toNamed(Routes.noticeBoard),
+            ),
           ] else ...[
             DrawerTile(
               text: "Home",
@@ -196,7 +201,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.push(
                   context,
                   CupertinoPageRoute(
-                      builder: (context) => const NoticeBoardScreen()),
+                      builder: (context) => const UserNoticeBoardScreen()),
                 );
               },
             ),
