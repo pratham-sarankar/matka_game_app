@@ -55,4 +55,15 @@ class BidRepository {
       return snapshot.docs.map((doc) => Bid.fromDoc(doc)).toList();
     });
   }
+
+  Query<Bid> getUserBidsQuery(String userId) {
+    return _firestore
+        .collection('bids')
+        .where('userId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .withConverter<Bid>(
+          fromFirestore: (snapshot, _) => Bid.fromDoc(snapshot),
+          toFirestore: (bid, _) => bid.toMap(),
+        );
+  }
 }

@@ -8,4 +8,5 @@ class Routes {
   static const String users = '/users';
   static const String deposits = '/deposits';
   static const String withdrawals = '/withdrawals';
+  static const String bidHistory = '/bid-history';
 }

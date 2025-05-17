@@ -152,7 +152,9 @@ class AppDrawer extends StatelessWidget {
             DrawerTile(
               text: "Bid History",
               icon: CupertinoIcons.calendar,
-              onTap: () {},
+              onTap: () {
+                Get.toNamed(Routes.bidHistory);
+              },
             ),
             DrawerTile(
               text: "Win History",

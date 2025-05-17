@@ -9,6 +9,8 @@ import 'package:matka_game_app/screens/my_wallet/my_wallet_screen.dart';
 import 'package:matka_game_app/screens/users/users_screen.dart';
 import 'package:matka_game_app/screens/profile/profile_screen.dart';
 import 'package:matka_game_app/screens/withdrawals/withdrawals_screen.dart';
+import 'package:matka_game_app/screens/bid_history/presentation/screens/bid_history_screen.dart';
+import 'package:matka_game_app/services/user_service.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -47,6 +49,10 @@ class AppPages {
     GetPage(
       name: Routes.withdrawals,
       page: () => const WithdrawalsScreen(),
+    ),
+    GetPage(
+      name: Routes.bidHistory,
+      page: () => BidHistoryScreen(userService: Get.find<UserService>()),
     ),
   ];
 }
