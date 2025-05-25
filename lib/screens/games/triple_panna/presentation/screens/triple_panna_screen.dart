@@ -8,6 +8,7 @@ import 'package:matka_game_app/models/bid.dart';
 import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/repositories/bid_repository.dart';
 import 'package:matka_game_app/services/user_service.dart';
+import 'package:matka_game_app/widgets/balance_widget.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
@@ -104,67 +105,6 @@ class _TriplePannaScreenState extends State<TriplePannaScreen> {
     );
   }
 
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'How to Play Triple Panna',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Rules:',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '• Enter a 3-digit number (000-999)\n'
-              '• All three digits must be identical\n'
-              '• Example: 000, 111, 222, 333, etc.',
-              style: GoogleFonts.poppins(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Winning Ratio:',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '• Bet ₹10 to win ₹5000\n'
-              '• Bet ₹100 to win ₹50000\n'
-              '• And so on...',
-              style: GoogleFonts.poppins(fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Got it',
-              style: GoogleFonts.poppins(
-                color: Colors.blue,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,10 +123,6 @@ class _TriplePannaScreenState extends State<TriplePannaScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.question_circle),
-            onPressed: _showHelpDialog,
-          ),
           if (_isViewMode)
             IconButton(
               icon: const Icon(Icons.edit),
@@ -194,6 +130,7 @@ class _TriplePannaScreenState extends State<TriplePannaScreen> {
                 setState(() => _isViewMode = false);
               },
             ),
+          BalanceWidget(userId: widget.userService.currentUserId),
         ],
       ),
       body: FormBuilder(

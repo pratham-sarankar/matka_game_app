@@ -8,6 +8,7 @@ import 'package:matka_game_app/models/bid.dart';
 import 'package:matka_game_app/models/market.dart';
 import 'package:matka_game_app/repositories/bid_repository.dart';
 import 'package:matka_game_app/services/user_service.dart';
+import 'package:matka_game_app/widgets/balance_widget.dart';
 import 'package:matka_game_app/widgets/bid_confirmation_dialog.dart';
 import 'package:matka_game_app/widgets/gradient_button.dart';
 
@@ -145,6 +146,7 @@ class _HalfSangamScreenState extends State<HalfSangamScreen> {
                 setState(() => _isViewMode = false);
               },
             ),
+          BalanceWidget(userId: widget.userService.currentUserId),
         ],
       ),
       body: FormBuilder(
