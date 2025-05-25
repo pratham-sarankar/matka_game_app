@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:matka_game_app/utils/time_of_day_extension.dart';
 
 /// A model class representing a market in the matka game.
@@ -114,77 +113,96 @@ class Market {
 
   /// Determines which session (open or close) the market is currently in.
   ///
-  /// Returns 'open' if we're in open session, 'close' if we're in close session,
-  /// or null if the market is closed.
+  /// Returns:
+  /// - 'open' if we're in open session (12:00 AM to openLastBidTime)
+  /// - 'close' if we're in close session (openTime to closeLastBidTime)
+  /// - null if the market is closed (during closed periods or outside market hours)
   String? get currentSession {
     final now = TimeOfDay.now();
-    return _getSessionForTime(now);
+    final currentMinutes = now.hour * 60 + now.minute;
+    final openMinutes = openTime.hour * 60 + openTime.minute;
+    final openLastBidMinutes =
+        openLastBidTime.hour * 60 + openLastBidTime.minute;
+    final closeMinutes = closeTime.hour * 60 + closeTime.minute;
+    final closeLastBidMinutes =
+        closeLastBidTime.hour * 60 + closeLastBidTime.minute;
+
+    // Open session: 12:00 AM to openLastBidTime
+    if (currentMinutes < openLastBidMinutes) {
+      return 'open';
+    }
+    // Closed period: openLastBidTime to openTime
+    else if (currentMinutes >= openLastBidMinutes &&
+        currentMinutes < openMinutes) {
+      return null;
+    }
+    // Close session: openTime to closeLastBidTime
+    else if (currentMinutes >= openMinutes &&
+        currentMinutes <= closeLastBidMinutes) {
+      return 'close';
+    }
+    // Closed period: closeLastBidTime to closeTime
+    else if (currentMinutes > closeLastBidMinutes &&
+        currentMinutes <= closeMinutes) {
+      return null;
+    }
+    // Closed period: closeTime to 12:00 AM
+    else {
+      return null;
+    }
   }
 
-  /// Helper method to determine session for a given time.
-  String? _getSessionForTime(TimeOfDay time) {
-    final currentMinutes = time.hour * 60 + time.minute;
-    final openMinutes = openTime.hour * 60 + openTime.minute;
-    final closeMinutes = closeTime.hour * 60 + closeTime.minute;
+  /// Determines if bidding is currently allowed for the open session.
+  ///
+  /// Returns true if:
+  /// 1. The current day is marked as open in [openDays]
+  /// 2. The current time is between 12:00 AM and [openLastBidTime]
+  bool get isOpenSessionBiddingAllowed {
+    final now = TimeOfDay.now();
+    final currentDay = DateTime.now().weekday - 1; // 0-6 for Monday-Sunday
 
-    // If close time is less than open time, it means the market spans across midnight
-    if (closeMinutes < openMinutes) {
-      if (currentMinutes >= openMinutes) {
-        return 'open';
-      } else if (currentMinutes <= closeMinutes) {
-        return 'close';
-      }
-    } else {
-      if (currentMinutes >= openMinutes && currentMinutes <= closeMinutes) {
-        return 'open';
-      }
+    // Check if the day is open
+    if (openDays[currentDay] != '1') {
+      return false;
     }
-    return null;
+
+    final currentMinutes = now.hour * 60 + now.minute;
+    final openLastBidMinutes =
+        openLastBidTime.hour * 60 + openLastBidTime.minute;
+
+    // Check if current time is between 12:00 AM and openLastBidTime
+    return currentMinutes < openLastBidMinutes;
+  }
+
+  /// Determines if bidding is currently allowed for the close session.
+  ///
+  /// Returns true if:
+  /// 1. The current day is marked as open in [openDays]
+  /// 2. The current time is between [openTime] and [closeLastBidTime]
+  bool get isCloseSessionBiddingAllowed {
+    final now = TimeOfDay.now();
+    final currentDay = DateTime.now().weekday - 1; // 0-6 for Monday-Sunday
+
+    // Check if the day is open
+    if (openDays[currentDay] != '1') {
+      return false;
+    }
+
+    final currentMinutes = now.hour * 60 + now.minute;
+    final openMinutes = openTime.hour * 60 + openTime.minute;
+    final closeLastBidMinutes =
+        closeLastBidTime.hour * 60 + closeLastBidTime.minute;
+
+    // Check if current time is between openTime and closeLastBidTime
+    return currentMinutes >= openMinutes &&
+        currentMinutes <= closeLastBidMinutes;
   }
 
   /// Checks if the market is currently open for betting.
   ///
-  /// A market is considered open if:
-  /// 1. The current day is marked as open in [openDays]
-  /// 2. The current time is within a valid session (open or close)
-  /// 3. The current time is before the last bid time for that session
+  /// A market is considered open if either open session or close session bidding is allowed.
   bool get isOpen {
-    final now = TimeOfDay.now();
-    final currentDay = DateTime.now().weekday - 1; // 0-6 for Monday-Sunday
-    return _isOpenForTime(now, currentDay);
-  }
-
-  /// Helper method to check if market is open for a given time and day.
-  bool _isOpenForTime(TimeOfDay time, int day) {
-    final isOpenDay = openDays[day] == '1';
-    if (!isOpenDay) {
-      return false;
-    }
-
-    final session = _getSessionForTime(time);
-    if (session == null) return false;
-
-    final currentMinutes = time.hour * 60 + time.minute;
-
-    if (session == 'open') {
-      final openLastBidMinutes =
-          openLastBidTime.hour * 60 + openLastBidTime.minute;
-      return currentMinutes <= openLastBidMinutes;
-    } else {
-      final closeLastBidMinutes =
-          closeLastBidTime.hour * 60 + closeLastBidTime.minute;
-      return currentMinutes <= closeLastBidMinutes;
-    }
-  }
-
-  /// Checks if bets can still be placed in the market.
-  ///
-  /// Returns true if:
-  /// 1. The market is open ([isOpen] returns true)
-  /// 2. The current time is before or equal to the appropriate last bid time
-  ///    based on whether we're in open or close session
-  bool get canPlaceBid {
-    return isOpen;
+    return isOpenSessionBiddingAllowed || isCloseSessionBiddingAllowed;
   }
 
   /// Creates a copy of this [Market] with the given fields replaced with new values.
