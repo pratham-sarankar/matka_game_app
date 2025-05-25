@@ -30,9 +30,7 @@ class GameListScreen extends StatefulWidget {
 }
 
 class _GameListScreenState extends State<GameListScreen> {
-  bool get _isMarketOpen {
-    return widget.market.isOpen && widget.market.canPlaceBid;
-  }
+  bool get _isOpen => widget.market.isOpen;
 
   void _showMarketClosedDialog() {
     showDialog(
@@ -65,7 +63,7 @@ class _GameListScreenState extends State<GameListScreen> {
   }
 
   void _navigateToGame(String gameType) {
-    if (!_isMarketOpen) {
+    if (!_isOpen) {
       _showMarketClosedDialog();
       return;
     }
@@ -197,7 +195,7 @@ class _GameListScreenState extends State<GameListScreen> {
       ),
       body: Column(
         children: [
-          if (!_isMarketOpen)
+          if (!_isOpen)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8),

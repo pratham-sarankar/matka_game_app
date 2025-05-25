@@ -56,35 +56,58 @@ class WalletRepository {
         .delete();
   }
 
-  Future<int> _getTodayRequestCount() async {
-    final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    final query = FirebaseFirestore.instance
-        .collection(_collection)
-        .where('userID', isEqualTo: userId)
-        .where('requestedAt', isGreaterThanOrEqualTo: startOfDay)
-        .where('requestedAt', isLessThan: endOfDay);
-
-    final snapshot = await query.get();
-    return snapshot.docs.length;
-  }
-
-  Future<void> addWalletTransaction(WalletTransaction transaction) async {
-    // Check request limit before adding transaction
-    final requestCount = await _getTodayRequestCount();
-
-    if (requestCount >= 10) {
-      throw RequestLimitException(
-        'You have reached the daily limit of 10 ${transaction.type.name.toLowerCase()} requests. Please try again tomorrow.',
-      );
-    }
-
-    // Continue with existing transaction creation logic
-    transaction.requestedAt = Timestamp.now();
+  Future<void> addWalletTransaction(WalletTransaction walletTransaction) async {
     await FirebaseFirestore.instance
-        .collection(_collection)
-        .add(transaction.toMap());
+        .runTransaction((firestoreTransaction) async {
+      // Get user document
+      final userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(walletTransaction.userID);
+      final userDoc = await firestoreTransaction.get(userRef);
+
+      if (!userDoc.exists) {
+        throw Exception('User not found');
+      }
+
+      // Get today's request count
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final requestCountQuery = FirebaseFirestore.instance
+          .collection(_collection)
+          .where('userID', isEqualTo: walletTransaction.userID)
+          .where('requestedAt', isGreaterThanOrEqualTo: startOfDay)
+          .where('requestedAt', isLessThan: endOfDay);
+
+      final requestCountSnapshot = await requestCountQuery.get();
+      final requestCount = requestCountSnapshot.docs.length;
+
+      if (requestCount >= 10) {
+        throw RequestLimitException(
+          'You have reached the daily limit of 10 ${walletTransaction.type.name.toLowerCase()} requests. Please try again tomorrow.',
+        );
+      }
+
+      // Check balance for withdrawal requests
+      if (walletTransaction.type == WalletTransactionType.withdrawal) {
+        final currentBalance =
+            (userDoc.data()?['balance'] as num?)?.toDouble() ?? 0.0;
+
+        if (currentBalance < walletTransaction.amount) {
+          throw Exception(
+            'Insufficient balance. Required: ₹${walletTransaction.amount}, Available: ₹$currentBalance',
+          );
+        }
+      }
+
+      // Add the transaction
+      final transactionRef =
+          FirebaseFirestore.instance.collection(_collection).doc();
+      firestoreTransaction.set(transactionRef, {
+        ...walletTransaction.toMap(),
+        'requestedAt': Timestamp.now(),
+      });
+    });
   }
 }
